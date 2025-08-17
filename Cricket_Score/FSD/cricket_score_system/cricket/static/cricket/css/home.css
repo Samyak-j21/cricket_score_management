@@ -1,0 +1,41 @@
+/* Updated Styles for the home page */
+.match-card {
+    background: linear-gradient(135deg, #1a3c34, #2a6b5f);
+    color: #000000;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.match-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.match-card .card-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+}
+
+.match-card .card-text {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.match-card .btn-light {
+    background-color: #a3e635;
+    color: #1a202c;
+    font-weight: 600;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.match-card .btn-light:hover {
+    background-color: #93d52b;
+    transform: scale(1.05);
+}

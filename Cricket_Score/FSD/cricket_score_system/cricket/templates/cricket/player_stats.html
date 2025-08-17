@@ -1,0 +1,144 @@
+{% extends 'cricket/base.html' %}
+{% load static %}
+
+{# This block sets the title of the HTML page #}
+{% block title %}{{ player.name }} Stats - Cricket Score System{% endblock %}
+
+{# This is the main content block for the page #}
+{% block content %}
+<section aria-labelledby="player-stats-heading" class="py-8">
+    {# Main heading for the player stats section #}
+    <h1 id="player-stats-heading" class="text-3xl font-bold text-center text-gray-900 mb-6">
+        <i class="fas fa-user mr-2 text-blue-600"></i>
+        {{ player.name }} Stats
+    </h1>
+    <div class="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {# Card displaying basic player information #}
+        <div class="card shadow-lg rounded-lg bg-white p-6 transition-transform transform hover:scale-105 hover:shadow-xl">
+            <div class="card-body">
+                {# Player's name as a card title #}
+                <h5 class="card-title text-2xl font-semibold text-gray-800 mb-4">
+                    {{ player.name }}
+                </h5>
+                {# Player details #}
+                <div class="space-y-3">
+                    <p class="text-gray-600 flex items-center">
+                        <i class="fas fa-users mr-2 text-blue-600"></i>
+                        <span class="font-medium">Team:</span> {{ player.team.name }}
+                    </p>
+                    <p class="text-gray-600 flex items-center">
+                        <i class="fas fa-briefcase mr-2 text-blue-600"></i>
+                        <span class="font-medium">Role:</span> {{ player.role }}
+                    </p>
+                    <p class="text-gray-600 flex items-center">
+                        <i class="fas fa-tachometer-alt mr-2 text-blue-600"></i>
+                        <span class="font-medium">Total Runs:</span> <span class="text-blue-600 font-bold">{{ total_runs }}</span>
+                    </p>
+                    <p class="text-gray-600 flex items-center">
+                        <i class="fas fa-cricket-bat-ball mr-2 text-blue-600"></i>
+                        <span class="font-medium">Wickets Taken:</span> <span class="text-blue-600 font-bold">{{ wickets_taken }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {# Stats Graph Section #}
+        <div class="card shadow-lg rounded-lg bg-white p-6 mt-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Performance Graph</h3>
+            <div class="chart-container relative h-80 w-full">
+                {# Canvas for Chart.js graph. Data is passed via data-graph-data attribute. #}
+                <canvas id="playerStatsChart" data-graph-data="{{ player_stats_data|safe }}" aria-label="Performance graph for {{ player.name }}"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# Loading Spinner - hidden by default, shown during content loading #}
+    <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-100 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="spinner-border text-blue-600 border-4 border-t-4 border-t-transparent rounded-full animate-spin h-12 w-12" role="status">
+            <span class="sr-only">Loading...</span> {# sr-only for screen readers #}
+        </div>
+    </div>
+</section>
+{% endblock %} {# END of block content #}
+
+{# This block is for custom CSS specific to this template #}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cricket/css/player.css' %}">
+{# Assuming Font Awesome is loaded in base.html. If not, add: #}
+{# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> #}
+{% endblock %}
+
+{# This block is for custom JavaScript specific to this template #}
+{% block extra_js %}
+{# Chart.js library CDN - required for the charts #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{# Your custom charts.js file #}
+<script src="{% static 'cricket/js/charts.js' %}" defer></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const spinner = document.getElementById('loading-spinner');
+        const card = document.querySelector('.card');
+
+        // Simulate loading: Hides spinner and makes card visible after a short delay.
+        // In a real application, replace setTimeout with actual data fetching/rendering completion.
+        setTimeout(() => {
+            if (spinner) spinner.classList.add('hidden');
+            if (card) card.classList.remove('opacity-50'); // Assuming it starts with opacity-50 for loading effect
+        }, 500);
+
+        // Add a subtle click animation to the card for user feedback
+        if (card) {
+            card.addEventListener('click', () => {
+                card.classList.add('animate-pulse');
+                setTimeout(() => card.classList.remove('animate-pulse'), 300);
+            });
+        }
+
+        // Chart.js initialization for player stats graph
+        const canvas = document.getElementById('playerStatsChart');
+        if (canvas) {
+            const graphData = JSON.parse(canvas.dataset.graphData || '{}');
+
+            new Chart(canvas, {
+                type: 'bar', // Type of chart (bar chart)
+                data: {
+                    labels: graphData.labels || ['Match 1', 'Match 2', 'Match 3', 'Match 4', 'Match 5'], // Default labels if none provided
+                    datasets: [
+                        {
+                            label: 'Runs Scored', // Label for runs dataset
+                            data: graphData.runs || [], // Runs data from context
+                            backgroundColor: 'rgba(37, 99, 235, 0.6)', // Blue background for runs
+                            borderColor: '#2563eb', // Darker blue border
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Wickets Taken', // Label for wickets dataset
+                            data: graphData.wickets || [], // Wickets data from context
+                            backgroundColor: 'rgba(220, 38, 38, 0.6)', // Red background for wickets
+                            borderColor: '#dc2626', // Darker red border
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, // Chart resizes with its container
+                    maintainAspectRatio: false, // Don't force a specific aspect ratio
+                    scales: {
+                        y: {
+                            beginAtZero: true, // Y-axis starts from zero
+                            title: { display: true, text: 'Stats' } // Y-axis title
+                        },
+                        x: {
+                            title: { display: true, text: 'Matches' } // X-axis title
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }, // Legend at the top of the chart
+                        tooltip: { mode: 'index', intersect: false } // Tooltip shows all data points on hover
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'cricket/base.html' %}
+{% load static %}
+
+{% block title %}Home - Cricket Score System{% endblock %}
+
+{% block content %}
+<section class="py-8">
+    <div class="container max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {# Hero Section #}
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-lg shadow-xl text-center mb-10">
+            <h1 class="text-4xl font-extrabold mb-4">Welcome to Cricket Score System!</h1>
+            <p class="text-xl">Stay updated with live scores, team stats, and player performances.</p>
+            <div class="mt-6 flex justify-center space-x-4">
+                <a href="{% url 'team_list' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-blue-800 bg-white hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                    <i class="fas fa-users mr-2"></i> View All Teams
+                </a>
+                {# Link to a general matches page - this is the line causing the error if the URL isn't recognized #}
+                <a href="{% url 'all_matches' %}" class="inline-flex items-center px-6 py-3 border border-white text-base font-medium rounded-md shadow-sm text-white hover:bg-white hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                    <i class="fas fa-calendar-alt mr-2"></i> All Matches
+                </a>
+            </div>
+        </div>
+
+        {# Upcoming Matches Section #}
+        <div class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">
+                <i class="fas fa-hourglass-half mr-2 text-orange-500"></i> Upcoming Matches
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% if upcoming_matches %}
+                    {% for match in upcoming_matches %}
+                    <div class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center transition-transform transform hover:scale-105 hover:shadow-xl">
+                        <a href="{% url 'match_detail' match.id %}" class="block w-full">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ match.name|default:'' }}</h3>
+                            <p class="text-lg text-gray-700 mb-2">{{ match.team1.name }} <span class="font-bold text-blue-600">vs</span> {{ match.team2.name }}</p>
+                            <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt mr-1"></i> {{ match.date|date:"M d, Y P" }}</p>
+                            <p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-1"></i> {{ match.venue }}</p>
+                            <span class="mt-3 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{{ match.status }}</span>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-full text-center py-8 bg-white rounded-lg shadow-md">
+                        <p class="text-gray-600 text-lg">No upcoming matches currently scheduled.</p>
+                        <i class="fas fa-hourglass-end text-gray-400 mt-4 text-5xl"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Recently Completed Matches Section #}
+        <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">
+                <i class="fas fa-check-circle mr-2 text-green-600"></i> Recently Completed Matches
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% if completed_matches %}
+                    {% for match in completed_matches %}
+                    <div class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center transition-transform transform hover:scale-105 hover:shadow-xl">
+                        <a href="{% url 'match_detail' match.id %}" class="block w-full">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ match.name|default:'' }}</h3>
+                            <p class="text-lg text-gray-700 mb-2">{{ match.team1.name }} <span class="font-bold text-blue-600">vs</span> {{ match.team2.name }}</p>
+                            <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt mr-1"></i> {{ match.date|date:"M d, Y P" }}</p>
+                            <p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-1"></i> {{ match.venue }}</p>
+                            <p class="mt-3 text-base font-semibold {% if match.winner == match.team1 or match.winner == match.team2 %}text-green-600{% else %}text-gray-600{% endif %}">
+                                {% if match.winner %}
+                                    <i class="fas fa-trophy mr-1"></i> {{ match.winner.name }} won!
+                                {% else %}
+                                    Result: {{ match.result|default:'N/A' }}
+                                {% endif %}
+                            </p>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-full text-center py-8 bg-white rounded-lg shadow-md">
+                        <p class="text-gray-600 text-lg">No recently completed matches found.</p>
+                        <i class="fas fa-clipboard-check text-gray-400 mt-4 text-5xl"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+{# Ensure Font Awesome is loaded for icons #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0k4ApnW/rs0gX53C8Ie0T3Q2N5tKkY9hJ2u7w6/7k7Q4q+3wJ6b/4yF7zA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}

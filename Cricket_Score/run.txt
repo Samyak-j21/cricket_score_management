@@ -1,0 +1,7 @@
+cd C:\Users\samya\OneDrive\Desktop\PBL_project\FSD
+
+.\venv\Scripts\activate
+
+cd C:\Users\samya\OneDrive\Desktop\PBL_project\FSD\cricket_score_system
+
+python manage.py runserver

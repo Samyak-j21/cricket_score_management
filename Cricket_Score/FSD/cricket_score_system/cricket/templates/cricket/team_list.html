@@ -1,0 +1,46 @@
+{% extends 'cricket/base.html' %}
+{% load static %}
+
+{% block title %}Teams - Cricket Score System{% endblock %}
+
+{% block content %}
+<section class="py-8">
+    <h1 class="text-3xl font-bold text-center text-gray-900 mb-6">
+        <i class="fas fa-users mr-2 text-blue-600"></i>
+        All Teams
+    </h1>
+
+    <div class="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% if teams %}
+            {% for team in teams %}
+            <div class="card shadow-lg rounded-lg bg-white p-6 flex flex-col items-center text-center transition-transform transform hover:scale-105 hover:shadow-xl">
+                <a href="{% url 'team_detail' team.id %}" class="block w-full">
+                    <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                        {% if team.logo %}
+                            <img src="{{ team.logo.url }}" alt="{{ team.name }} Logo" class="w-full h-full object-cover">
+                        {% else %}
+                            {# Placeholder for teams without a logo #}
+                            <span class="text-gray-400 text-6xl"><i class="fas fa-shield-alt"></i></span>
+                        {% endif %}
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ team.name }}</h2>
+                    {% if team.country %}
+                        <p class="text-gray-600 text-sm">{{ team.country }}</p>
+                    {% endif %}
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-span-full text-center py-8">
+                <p class="text-gray-600 text-lg">No teams found. Please add teams via the admin panel.</p>
+                <i class="fas fa-frown text-gray-400 mt-4 text-5xl"></i>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+{# Assuming Font Awesome is loaded in base.html. If not, add this: #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0k4ApnW/rs0gX53C8Ie0T3Q2N5tKkY9hJ2u7w6/7k7Q4q+3wJ6b/4yF7zA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}

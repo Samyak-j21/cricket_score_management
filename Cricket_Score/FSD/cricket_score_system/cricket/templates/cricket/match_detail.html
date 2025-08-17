@@ -1,0 +1,291 @@
+{% extends 'cricket/base.html' %}
+{% load static %}
+
+{# Line 6: This is the start of the content block #}
+{% block content %}
+<section aria-labelledby="match-detail-heading" class="py-8">
+    <h1 id="match-detail-heading" class="text-4xl font-extrabold text-center text-gray-900 mb-8 animate__animated animate__fadeInDown">
+        <i class="fas fa-cricket-bat-ball mr-3 text-blue-600"></i>
+        {{ match.team1.name }} <span class="text-gray-500">vs</span> {{ match.team2.name }}
+    </h1>
+
+    <div class="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Scorecard Section -->
+            <div class="bg-white shadow-xl rounded-2xl p-6 transition-transform transform hover:scale-[1.02] duration-300 animate__animated animate__fadeInLeft">
+                <h3 class="text-2xl font-bold text-gray-800 mb-5 border-b pb-3 border-gray-200">Current Scorecard</h3>
+                <div class="space-y-4">
+                    <p class="text-gray-700 text-lg flex justify-between items-center">
+                        <span class="font-semibold">{{ match.team1.name }}:</span>
+                        <span id="score-{{ match.id }}" class="text-blue-700 font-extrabold text-2xl">{{ team1_score }}</span>
+                    </p>
+                    <p class="text-gray-700 text-lg flex justify-between items-center">
+                        <span class="font-semibold">{{ match.team2.name }}:</span>
+                        <span id="score-team2-{{ match.id }}" class="text-blue-700 font-extrabold text-2xl">{{ team2_score }}</span>
+                    </p>
+                </div>
+
+                <h4 class="text-xl font-bold text-gray-800 mt-6 mb-3 border-b pb-2 border-gray-200">Win Probability</h4>
+                <div class="space-y-3">
+                    <p class="text-gray-700 flex justify-between items-center">
+                        <span class="font-medium">{{ match.team1.name }}:</span>
+                        <span id="prob-team1-{{ match.id }}" class="text-green-600 font-bold text-lg">{{ team1_win_prob|floatformat:2 }}%</span>
+                    </p>
+                    <p class="text-gray-700 flex justify-between items-center">
+                        <span class="font-medium">{{ match.team2.name }}:</span>
+                        <span id="prob-team2-{{ match.id }}" class="text-green-600 font-bold text-lg">{{ team2_win_prob|floatformat:2 }}%</span>
+                    </p>
+                </div>
+
+                <h4 class="text-xl font-bold text-gray-800 mt-6 mb-3 border-b pb-2 border-gray-200">Predicted Score (20 Overs)</h4>
+                <p class="text-gray-700 text-lg">
+                    <span id="predicted-score-{{ match.id }}" class="text-purple-600 font-extrabold text-xl">{{ predicted_score|floatformat:0 }} runs</span>
+                </p>
+
+                {% if match.status == 'Live' %}
+                <button class="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold py-3 px-6 rounded-xl mt-6 shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 live-update-btn flex items-center justify-center" data-match-id="{{ match.id }}">
+                    <i class="fas fa-sync-alt mr-3 text-lg"></i> Live Update Score
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Run Rate Graph Section -->
+            <div class="bg-white shadow-xl rounded-2xl p-6 animate__animated animate__fadeInRight">
+                <h3 class="text-2xl font-bold text-gray-800 mb-5 border-b pb-3 border-gray-200">Run Rate Graph</h3>
+                <div class="chart-container relative h-96">
+                    <canvas id="runRateChart" data-graph-data="{{ graph_data|safe }}" aria-label="Run rate graph for {{ match.team1.name }} vs {{ match.team2.name }}"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ball-by-Ball Commentary Section -->
+        <div class="mt-10 animate__animated animate__fadeInUp">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">Ball-by-Ball Commentary</h3>
+            <ul class="space-y-4" id="commentary-list">
+                {% for ball in balls %}
+                <li class="bg-white shadow-lg rounded-xl p-5 border-l-4 border-blue-500 animate__animated animate__fadeInUp animate__faster">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-extrabold text-lg text-gray-900">
+                            Over {{ ball.over }}: <span class="text-blue-700">{{ ball.batsman.name }}</span> vs <span class="text-red-700">{{ ball.bowler.name }}</span> - <span class="text-green-700">{% if ball.is_wicket %}W{% else %}{{ ball.runs }} run(s){% endif %}</span>
+                        </span>
+                        <span class="text-md text-gray-600 space-x-2">
+                            {% if ball.is_wicket %}<span class="bg-red-100 text-red-800 px-3 py-1 rounded-full font-semibold"><i class="fas fa-times-circle mr-1"></i> Wicket</span>{% endif %}
+                            {% if ball.is_wide %}<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold"><i class="fas fa-exclamation-triangle mr-1"></i> Wide</span>{% endif %}
+                            {% if ball.is_no_ball %}<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold"><i class="fas fa-ban mr-1"></i> No Ball</span>{% endif %}
+                        </span>
+                    </div>
+                    <p class="text-gray-700 text-base leading-relaxed">{{ ball.commentary }}</p>
+                </li>
+                {% empty %}
+                <li class="bg-white shadow-md rounded-lg p-5 text-center text-gray-500 italic">
+                    No commentary available yet. Stay tuned!
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {# Back to All Matches button #}
+        <div class="text-center mt-8">
+            <a href="{% url 'all_matches' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                <i class="fas fa-arrow-left mr-2"></i> Back to All Matches
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %} {# This is the essential closing tag for the 'content' block #}
+
+<!-- Loading Spinner -->
+<div id="loading-spinner" class="hidden fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out">
+    <div class="flex flex-col items-center">
+        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-blue-600" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-4 text-white text-lg font-semibold animate-pulse">Updating scores...</p>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> {# Ensure Chart.js is loaded #}
+<script src="{% static 'cricket/js/charts.js' %}" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const spinner = document.getElementById('loading-spinner');
+    const updateButtons = document.querySelectorAll('.live-update-btn');
+    const commentaryList = document.getElementById('commentary-list');
+
+    // Chart.js initialization for run rate graph
+    let runRateChart; // Declare chart instance globally to update it later
+
+    function initRunRateChart(graphData) {
+        const ctx = document.getElementById('runRateChart').getContext('2d');
+        if (runRateChart) {
+            runRateChart.destroy(); // Destroy previous chart instance if exists
+        }
+        runRateChart = new Chart(ctx, {
+            type: 'line', // Line chart for run rate
+            data: {
+                labels: graphData.labels || [], // E.g., over numbers
+                datasets: [
+                    {
+                        label: 'Run Rate',
+                        data: graphData.run_rates || [], // Run rate data
+                        borderColor: '#2563eb', // Blue line
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)', // Light blue fill
+                        tension: 0.3, // Smooth curves
+                        fill: true,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#2563eb',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Run Rate' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Overs' }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+    }
+
+    // Call initRunRateChart with initial data from Django context
+    const initialGraphData = JSON.parse(document.getElementById('runRateChart').dataset.graphData || '{}');
+    initRunRateChart(initialGraphData);
+
+    // Function to update the chart (called on live update)
+    function updateChart(newData) {
+        if (runRateChart) {
+            runRateChart.data.labels = newData.labels;
+            runRateChart.data.datasets[0].data = newData.run_rates;
+            runRateChart.update();
+        }
+    }
+
+    // Function to create a new commentary list item
+    function createCommentaryItem(ball) {
+        const li = document.createElement('li');
+        li.className = 'bg-white shadow-lg rounded-xl p-5 border-l-4 border-blue-500 animate__animated animate__fadeInUp animate__faster';
+        li.innerHTML = `
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-extrabold text-lg text-gray-900">
+                    Over ${ball.over}: <span class="text-blue-700">${ball.batsman_name}</span> vs <span class="text-red-700">${ball.bowler_name}</span> - <span class="text-green-700">${ball.is_wicket ? 'Wicket' : ball.runs + ' run(s)'}</span>
+                </span>
+                <span class="text-md text-gray-600 space-x-2">
+                    ${ball.is_wicket ? '<span class="bg-red-100 text-red-800 px-3 py-1 rounded-full font-semibold"><i class="fas fa-times-circle mr-1"></i> Wicket</span>' : ''}
+                    ${ball.is_wide ? '<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold"><i class="fas fa-exclamation-triangle mr-1"></i> Wide</span>' : ''}
+                    ${ball.is_no_ball ? '<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold"><i class="fas fa-ban mr-1"></i> No Ball</span>' : ''}
+                </span>
+            </div>
+            <p class="text-gray-700 text-base leading-relaxed">${ball.commentary}</p>
+        `;
+        return li;
+    }
+
+    // Handle live score updates
+    updateButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const matchId = button.dataset.matchId;
+            spinner.classList.remove('hidden'); // Show spinner
+
+            try {
+                // IMPORTANT: This API endpoint must return ALL updated data (scores, probs, new commentary balls, and updated graph_data)
+                // You'll need to create this API endpoint in your Django project
+                const response = await fetch(`/api/matches/${matchId}/update/`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update scores
+                    document.getElementById(`score-${matchId}`).textContent = data.team1_score;
+                    document.getElementById(`score-team2-${matchId}`).textContent = data.team2_score;
+
+                    // Update win probabilities
+                    document.getElementById(`prob-team1-${matchId}`).textContent = `${data.team1_win_prob.toFixed(2)}%`;
+                    document.getElementById(`prob-team2-${matchId}`).textContent = `${data.team2_win_prob.toFixed(2)}%`;
+
+                    // Update predicted score
+                    document.getElementById(`predicted-score-${matchId}`).textContent = `${data.predicted_score.toFixed(0)} runs`;
+
+                    // Add new commentary balls
+                    if (data.new_balls && data.new_balls.length > 0) {
+                        // Clear "No commentary" message if present
+                        const noCommentaryItem = commentaryList.querySelector('.italic');
+                        if (noCommentaryItem) {
+                            noCommentaryItem.remove();
+                        }
+                        // Prepend new balls to the top of the list
+                        data.new_balls.forEach(ball => {
+                            const newBallElement = createCommentaryItem(ball);
+                            commentaryList.prepend(newBallElement);
+                        });
+                    }
+
+                    // Update graph if new data is provided
+                    if (data.graph_data) {
+                        updateChart(data.graph_data);
+                    }
+
+                    // Simple button animation
+                    button.classList.add('animate-pulse', 'bg-blue-900');
+                    setTimeout(() => button.classList.remove('animate-pulse', 'bg-blue-900'), 1000);
+
+                } else {
+                    console.error('API update failed:', data.message);
+                }
+            } catch (error) {
+                console.error('Error updating score:', error);
+                // In a real app, display a user-friendly error message
+            } finally {
+                spinner.classList.add('hidden'); // Hide spinner
+            }
+        });
+    });
+
+    // Optional: Animate existing commentary entries on load
+    document.querySelectorAll('#commentary-list > li').forEach((item, index) => {
+        item.style.animationDelay = `${index * 0.1}s`;
+        item.classList.add('animate__animated', 'animate__fadeInUp', 'animate__faster');
+    });
+
+    // Placeholder for spinner styling
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+{# Ensure Font Awesome is loaded for icons #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0k4ApnW/rs0gX53C8Ie0T3Q2N5tKkY9hJ2u7w6/7k7Q4q+3wJ6b/4yF7zA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{# Animate.css for animations #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+{% endblock %}

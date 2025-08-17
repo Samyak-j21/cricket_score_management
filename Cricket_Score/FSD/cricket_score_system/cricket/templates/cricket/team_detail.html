@@ -1,0 +1,77 @@
+{% extends 'cricket/base.html' %}
+{% load static %}
+
+{% block title %}{{ team.name }} Details - Cricket Score System{% endblock %}
+
+{% block content %}
+<section class="py-8">
+    <h1 class="text-3xl font-bold text-center text-gray-900 mb-6">
+        <i class="fas fa-users mr-2 text-blue-600"></i>
+        {{ team.name }} Details
+    </h1>
+
+    <div class="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {# Team Information Card #}
+        <div class="card shadow-lg rounded-lg bg-white p-6 mb-8 text-center">
+            <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-4 border-blue-200">
+                {% if team.logo %}
+                    <img src="{{ team.logo.url }}" alt="{{ team.name }} Logo" class="w-full h-full object-cover">
+                {% else %}
+                    <span class="text-gray-400 text-7xl"><i class="fas fa-shield-alt"></i></span>
+                {% endif %}
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">{{ team.name }}</h2>
+            {% if team.country %}
+                <p class="text-gray-600 text-lg mb-4">Country: {{ team.country }}</p>
+            {% endif %}
+            <p class="text-gray-500 text-sm">Founded: {{ team.created_at|date:"Y" }}</p>
+        </div>
+
+        {# Players Section #}
+        <div class="card shadow-lg rounded-lg bg-white p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-cricket-ball mr-2 text-blue-600"></i>
+                Players
+            </h3>
+            {% if players %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"> {# Adjusted gap for better spacing #}
+                {% for player in players %}
+                <div class="bg-white p-0 rounded-lg shadow-md border border-gray-200 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300">
+                    {# Player Image Section #}
+                    <div class="w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
+                        {% if player.image %}
+                            <img src="{{ player.image.url }}" class="w-full h-full object-cover" alt="{{ player.name }}">
+                        {% else %}
+                            <img src="{% static 'default_player.png' %}" class="w-full h-full object-contain p-4" alt="{{ player.name }} Placeholder">
+                        {% endif %}
+                    </div>
+                    {# Player Info and Button Section #}
+                    <div class="p-4 flex-grow w-full">
+                        <h4 class="text-xl font-semibold text-gray-900 mb-2">{{ player.name }}</h4>
+                        <p class="text-base text-gray-600 mb-4"><strong>Role:</strong> {{ player.role }}</p>
+                        {# Removed direct player.runs and player.wickets here as they are no longer on Player model #}
+                        <a href="{% url 'player_stats' player.id %}" class="mt-2 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full">
+                            View Stats <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-gray-600 py-4">No players found for this team.</p>
+            {% endif %}
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="{% url 'team_list' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                <i class="fas fa-arrow-left mr-2"></i> Back to All Teams
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+{# Ensure Font Awesome is loaded for icons #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0k4ApnW/rs0gX53C8Ie0T3Q2N5tKkY9hJ2u7w6/7k7Q4q+3wJ6b/4yF7zA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}

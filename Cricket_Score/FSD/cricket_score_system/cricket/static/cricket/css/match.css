@@ -1,0 +1,67 @@
+/* Updated Styles for Match Detail Page */
+.scorecard {
+    background: linear-gradient(135deg, #f7fafc, #e6f0fa);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.scorecard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.scorecard p {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    color: #2d3748;
+    line-height: 1.6;
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    .scorecard {
+        background: linear-gradient(135deg, #1a202c, #2d3748);
+        color: #edf2f7;
+    }
+
+    .scorecard p {
+        color: #e2e8f0;
+    }
+
+    .list-group-item {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #edf2f7;
+    }
+
+    .list-group-item:hover {
+        background-color: #1a202c;
+    }
+}
+
+.chart-container {
+    max-width: 100%;
+    height: 320px;
+    margin-bottom: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.list-group-item {
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    padding: 0.75rem 1rem;
+}
+
+.list-group-item:hover {
+    background-color: #edf2f7;
+    transform: translateX(5px);
+}

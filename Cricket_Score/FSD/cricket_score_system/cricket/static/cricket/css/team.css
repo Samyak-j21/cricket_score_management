@@ -1,0 +1,58 @@
+/* Enhanced Styles for team and player pages */
+.team-logo {
+    max-height: 100px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.team-logo:hover {
+    transform: scale(1.05);
+}
+
+.player-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    transition: box-shadow 0.3s ease-in-out, transform 0.2s ease;
+}
+
+.player-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+.player-card .card-title {
+    font-size: 1.4rem;
+    color: #1a3c34;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.player-card .card-text {
+    font-size: 1rem;
+    color: #4a5568;
+    margin-bottom: 0.25rem;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .player-card {
+        padding: 1rem;
+    }
+
+    .player-card .card-title {
+        font-size: 1.2rem;
+    }
+
+    .player-card .card-text {
+        font-size: 0.95rem;
+    }
+
+    .team-logo {
+        max-height: 80px;
+    }
+}
